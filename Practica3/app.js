@@ -1,7 +1,7 @@
 import readline from 'readline';
 import { menuCocina } from './cocina.js';
 import { menuClientes } from './clientes.js';
-import { menuCaja } from './Pedidos.js';
+import { menuCaja } from './caja.js';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -15,11 +15,11 @@ function pregunta(preguntaTexto) {
 }
 
 async function menuPrincipal() {
-    console.log(`Sistema de cafeteria
-    1. Módulo Cocina 
-    2. Módulo Clientes 
-    3. Módulo Caja 
-    4. Salir `);
+    console.log(`--- Coffe Sistema --- 
+    1. Módulo Cocina
+    2. Módulo Clientes
+    3. Módulo Caja
+    4. Salir`);
 }
 
 async function main() {
@@ -38,7 +38,7 @@ async function main() {
                 await menuCaja(rl);
                 break;
             case '4':
-                console.log("Adios!");
+                console.log("Adiós!");
                 salir = true;
                 break;
             default:

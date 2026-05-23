@@ -1,6 +1,13 @@
 let productos = [];
+productos = [
+    { nombre: "Café Americano", precio: 35, tipo: "bebida" },
+        { nombre: "Latte", precio: 45, tipo: "bebida" },
+        { nombre: "Capuchino", precio: 50, tipo: "bebida" },
+        { nombre: "Pastel de Chocolate", precio: 60, tipo: "postre" },
+        { nombre: "Cheesecake", precio: 70, tipo: "postre" }
+]
 
-// Función para preguntar
+// Función auxiliar para preguntar
 function pregunta(rl, texto) {
     return new Promise(function(resolve) {
         rl.question(texto, resolve);
@@ -18,12 +25,12 @@ export function listarProductos() {
         console.log("No hay productos registrados.");
         return [];
     }
-    console.log("Lista de productos:");
+    console.log("\nLista de productos:");
     console.table(productos);
     return productos;
 }
 
-// filtros
+// NUEVAS FUNCIONES PARA FILTRAR (usando filter y find)
 export function productosBaratos(umbral = 50) {
     const baratos = productos.filter(function(p) {
         return p.precio < umbral;
@@ -31,7 +38,7 @@ export function productosBaratos(umbral = 50) {
     if (baratos.length === 0) {
         console.log(`No hay productos con precio menor a $${umbral}`);
     } else {
-        console.log(`Productos baratos (menos de $${umbral}):`);
+        console.log(`\nProductos baratos (menos de $${umbral}):`);
         console.table(baratos);
     }
     return baratos;
@@ -44,7 +51,7 @@ export function productosCaros(umbral = 100) {
     if (caros.length === 0) {
         console.log(`No hay productos con precio mayor a $${umbral}`);
     } else {
-        console.log(`Productos caros (más de $${umbral}):`);
+        console.log(`\nProductos caros (más de $${umbral}):`);
         console.table(caros);
     }
     return caros;
@@ -57,13 +64,13 @@ export function filtrarPorTipo(tipo) {
     if (filtrados.length === 0) {
         console.log(`No hay productos del tipo "${tipo}"`);
     } else {
-        console.log(`Productos tipo ${tipo}:`);
+        console.log(`\nProductos tipo ${tipo}:`);
         console.table(filtrados);
     }
     return filtrados;
 }
 
-// Función buscar 
+// Función buscar (find) – ejemplo para buscar un producto por nombre
 export function buscarProductoPorNombre(nombre) {
     const producto = productos.find(function(p) {
         return p.nombre.toLowerCase() === nombre.toLowerCase();
@@ -76,22 +83,19 @@ export function buscarProductoPorNombre(nombre) {
     return producto;
 }
 
-// Menu de cocina
+// Menú interactivo de Cocina ampliado
 function mostrarMenuCocina() {
-    console.log(`
- COCINA - GESTIÓN DE PRODUCTOS 
-  1.Agregar producto
-  2.Editar producto
-  3.Eliminar producto
-  4.Listar todos los productos
-  5.Buscar producto por nombre 
-  6.Productos baratos 
-  7.Productos caros 
-  8.Filtrar por tipo: bebidas
-  9.Filtrar por tipo: postres
- 10.Volver al menú principal
-===============================================
-`);
+    console.log(`---Cocina---
+  1. Agregar producto
+  2. Editar producto
+  3. Eliminar producto
+  4. Listar todos los productos
+  5. Buscar producto por nombre
+  6. Productos baratos
+  7. Productos caros
+  8. Filtrar por tipo: bebidas
+  9. Filtrar por tipo: postres
+ 10. Volver al menú principal`);
 }
 
 export async function menuCocina(rl) {
@@ -108,7 +112,7 @@ export async function menuCocina(rl) {
                 }
                 const precio = await pregunta(rl, "Precio: ");
                 const precioNum = parseFloat(precio);
-                if (isNaN(precioNum) || precioNum <= 0) {
+                if (precioNum <= 0) {
                     console.log("Precio inválido.");
                     break;
                 }
@@ -134,7 +138,7 @@ export async function menuCocina(rl) {
                 const nuevoNombre = await pregunta(rl, "Nuevo nombre (actual: " + producto.nombre + "): ");
                 const nuevoPrecio = await pregunta(rl, "Nuevo precio (actual: " + producto.precio + "): ");
                 const precioNum = parseFloat(nuevoPrecio);
-                if (isNaN(precioNum) || precioNum <= 0) {
+                if (precioNum <= 0) {
                     console.log("Precio inválido.");
                     break;
                 }
