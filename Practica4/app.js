@@ -15,7 +15,7 @@ function pregunta(preguntaTexto) {
 }
 
 async function menuPrincipal() {
-    console.log(`--- Coffe Sistema --- 
+    console.log(`--- Coffee Sistema --- 
     1. Módulo Cocina
     2. Módulo Clientes
     3. Módulo Caja
