@@ -1,6 +1,8 @@
-// clientes.js (con desglose al finalizar pedido)
+// clientes.js
 import * as cocina from './cocina.js';
 import * as caja from './caja.js';
+
+let siguienteId = 1;  // ID secuencial corto
 
 function obtenerPromocion() {
     const fecha = new Date();
@@ -16,24 +18,25 @@ function obtenerPromocion() {
 
 function mostrarMenuDinamico() {
     const promocion = obtenerPromocion();
-    console.log(`COFFEE CODE
-    ¡Bienvenido! Menú dinámico del día: 
+    console.log(`-- COFFEE CODE ---
+    ¡Bienvenido! Menú del día: 
     ${promocion.descripcion}`);
 }
 
 function mostrarMenuClientes() {
-    console.log(`----Clientes----
+    console.log(`---- Clientes ----
   1. Ver productos disponibles
   2. Crear nuevo pedido
-  3. Ver mis pedidos 
-  4. Ver total acumulado 
+  3. Ver mis pedidos (con estados)
+  4. Ver total acumulado
   5. Filtros de productos
   6. Filtros de pedidos
-  7. Volver al menú principal`);
+  7. Cancelar un pedido mío   <--- NUEVA OPCIÓN
+  8. Volver al menú principal`);
 }
 
 function mostrarFiltrosProductos() {
-    console.log(`---Filtros de productos---
+    console.log(`--- Filtros de productos ---
     1. Listar todos
     2. Productos baratos
     3. Productos caros
@@ -42,28 +45,22 @@ function mostrarFiltrosProductos() {
 }
 
 function mostrarFiltrosPedidos() {
-    console.log(`---Filtros de pedidos---
+    console.log(`--- Filtros de pedidos ---
     1. Ver todos los pedidos
     2. Ver pedidos por nombre de producto
     3. Ver pedidos mayores a cierto monto`);
 }
 
 function pregunta(rl, texto) {
-    return new Promise(function(resolve) {
-        rl.question(texto, resolve);
-    });
+    return new Promise(resolve => rl.question(texto, resolve));
 }
 
-function listarProductosConMap() {
+function listarProductos() {
     const productos = cocina.listarProductos();
     if (productos.length === 0) return;
     console.log("\nProductos disponibles:");
-    const listaFormateada = productos.map(function(p) {
-        return `- ${p.nombre} : $${p.precio} (${p.tipo})`;
-    });
-    listaFormateada.forEach(function(linea) {
-        console.log(linea);
-    });
+    const listaFormateada = productos.map(p => `- ${p.nombre} : $${p.precio} (${p.tipo})`);
+    listaFormateada.forEach(linea => console.log(linea));
 }
 
 function aplicarPromocion(producto, cantidad) {
@@ -71,45 +68,39 @@ function aplicarPromocion(producto, cantidad) {
     let precioUnitario = producto.precio;
     let cantidadEfectiva = cantidad;
     if (promocion.tipo && producto.tipo.toLowerCase() === promocion.tipo) {
-        const descuento = promocion.descuento;
-        if (descuento === 0.5 && promocion.tipo === "postre") {
+        if (promocion.descuento === 0.5 && promocion.tipo === "postre") {
             cantidadEfectiva = Math.ceil(cantidad / 2);
             console.log(`Promoción 2x1 en postres. Pagas ${cantidadEfectiva} de ${cantidad} unidades.`);
-            return { precioUnitario, cantidadEfectiva };
-        } else if (descuento === 0.15 || descuento === 0.10) {
-            precioUnitario = producto.precio * (1 - descuento);
-            console.log(`Descuento del ${descuento*100}% aplicado a ${producto.nombre}. Ahora cuesta $${precioUnitario.toFixed(2)} c/u.`);
-            return { precioUnitario, cantidadEfectiva };
+        } else if (promocion.descuento === 0.15 || promocion.descuento === 0.10) {
+            precioUnitario = producto.precio * (1 - promocion.descuento);
+            console.log(`Descuento del ${promocion.descuento*100}% aplicado a ${producto.nombre}. Ahora cuesta $${precioUnitario.toFixed(2)} c/u.`);
         }
     }
     return { precioUnitario, cantidadEfectiva };
 }
 
-// Función para mostrar desglose del pedido recién creado
 function mostrarDesglosePedido(items, totalPedido) {
     console.log("\n" + "=".repeat(50));
-    console.log("Desgloce de tu pedido:");
-    items.forEach(function(item, idx) {
+    console.log("Desglose de tu pedido:");
+    items.forEach((item, idx) => {
         console.log(`${idx+1}. ${item.nombre}`);
         console.log(`   Cantidad: ${item.cantidad} x $${item.precioUnitario.toFixed(2)} = $${item.subtotal.toFixed(2)}`);
     });
     console.log("--------------------------------");
     console.log(`Total del pedido: $${totalPedido.toFixed(2)}`);
-    // Mostrar también subtotal, IVA y total con IVA 
     const subtotal = totalPedido;
     const iva = subtotal * 0.16;
-    const totalConIva = subtotal + iva;
     console.log(`   Subtotal: $${subtotal.toFixed(2)}`);
     console.log(`   IVA (16%): $${iva.toFixed(2)}`);
-    console.log(`   Total a Pagar: $${totalConIva.toFixed(2)}`);
+    console.log(`   Total a Pagar: $${(subtotal + iva).toFixed(2)}`);
     console.log("=".repeat(50) + "\n");
 }
 
 async function crearPedidoMultiple(rl) {
-    console.log("\nCrear Nuvo Pedido");
+    console.log("\nCrear Nuevo Pedido");
     const productos = cocina.listarProductos();
     if (productos.length === 0) {
-        console.log("No hay productos disponibles para pedir.");
+        console.log("No hay productos disponibles.");
         return;
     }
 
@@ -118,20 +109,12 @@ async function crearPedidoMultiple(rl) {
 
     while (continuar) {
         console.log("\nSelecciona un producto por número o nombre:");
-        productos.forEach(function(p, idx) {
-            console.log(`${idx+1}. ${p.nombre} - $${p.precio} (${p.tipo})`);
-        });
-        const entrada = await pregunta(rl, "Número o nombre del producto: ");
-        
+        productos.forEach((p, idx) => console.log(`${idx+1}. ${p.nombre} - $${p.precio} (${p.tipo})`));
+        const entrada = await pregunta(rl, "Número o nombre: ");
         let productoSeleccionado = null;
         const num = parseInt(entrada);
-        if (!isNaN(num) && num >= 1 && num <= productos.length) {
-            productoSeleccionado = productos[num-1];
-        } else {
-            productoSeleccionado = productos.find(function(p) {
-                return p.nombre.toLowerCase() === entrada.toLowerCase();
-            });
-        }
+        if (!isNaN(num) && num >= 1 && num <= productos.length) productoSeleccionado = productos[num-1];
+        else productoSeleccionado = productos.find(p => p.nombre.toLowerCase() === entrada.toLowerCase());
 
         if (!productoSeleccionado) {
             console.log("Producto no encontrado.");
@@ -141,7 +124,7 @@ async function crearPedidoMultiple(rl) {
         const cantidad = await pregunta(rl, `Cantidad de ${productoSeleccionado.nombre}: `);
         const cant = parseInt(cantidad);
         if (isNaN(cant) || cant <= 0) {
-            console.log("Cantidad no válida.");
+            console.log("Cantidad inválida.");
             continue;
         }
 
@@ -150,40 +133,75 @@ async function crearPedidoMultiple(rl) {
 
         items.push({
             nombre: productoSeleccionado.nombre,
-            precioUnitario: precioUnitario,
+            precioUnitario,
             cantidad: cantidadEfectiva,
             subtotal: subtotalProducto,
             tipo: productoSeleccionado.tipo
         });
 
         console.log(`Agregado: ${cantidadEfectiva} x ${productoSeleccionado.nombre} - $${subtotalProducto.toFixed(2)}`);
-
-        const respuesta = await pregunta(rl, "¿Deseas agregar otro producto? (s/n): ");
-        if (respuesta.toLowerCase() !== 's') {
-            continuar = false;
-        }
+        const respuesta = await pregunta(rl, "¿Agregar otro producto? (s/n): ");
+        if (respuesta.toLowerCase() !== 's') continuar = false;
     }
 
     if (items.length === 0) {
-        console.log("No se agregaron productos. Pedido cancelado.");
+        console.log("Pedido cancelado.");
         return;
     }
 
-    const totalPedido = items.reduce(function(acc, item) {
-        return acc + item.subtotal;
-    }, 0);
+    const totalPedido = items.reduce((acc, item) => acc + item.subtotal, 0);
+    const id = siguienteId++;
 
     const pedido = {
-        id: Date.now(),
-        items: items,
+        id,
+        items,
         total: totalPedido,
-        fecha: new Date().toLocaleString()
+        fecha: new Date().toLocaleString(),
+        estado: "recibido"
     };
 
     caja.agregarPedido(pedido);
-    
-    // Mostrar desglose detallado del pedido que acabas de hacer
     mostrarDesglosePedido(items, totalPedido);
+
+    console.log(`📢 Pedido #${id} recibido. Estado: Pedido recibido`);
+
+    // Registrar callback para recibir notificaciones
+    caja.registrarCallback(id, (evento, data) => {
+        if (evento === "preparando") {
+            console.log(`🔄 Pedido #${id}: Preparando...`);
+        } else if (evento === "empacando") {
+            console.log(`📦 Pedido #${id}: Empacando...`);
+        } else if (evento === "entregado") {
+            console.log(`✅ Pedido #${id}: ¡ENTREGADO! 🎉`);
+        } else if (evento === "cancelado") {
+            console.log(`❌ Pedido #${id}: CANCELADO. Motivo: ${data}`);
+        }
+    });
+
+    // Iniciar preparación asíncrona
+    cocina.procesarPedido(pedido, (estado, motivo) => {
+        if (estado === "preparando") caja.notificarPedido(id, "preparando");
+        else if (estado === "empacando") caja.notificarPedido(id, "empacando");
+        else if (estado === "entregado") caja.notificarPedido(id, "entregado");
+        else if (estado === "cancelado") caja.notificarPedido(id, "cancelado", motivo);
+    }).catch(() => {});
+}
+
+// Nueva función para cancelar un pedido desde Cliente
+async function cancelarMiPedido(rl) {
+    console.log("\nCancelar mi pedido");
+    const id = parseInt(await pregunta(rl, "ID del pedido a cancelar: "));
+    if (isNaN(id)) {
+        console.log("ID inválido.");
+        return;
+    }
+    const motivo = await pregunta(rl, "Motivo de la cancelación: ");
+    // Llamamos a la función de caja, que ya valida y notifica
+    const exito = caja.cancelarPedido(id, motivo || "Cancelado por el cliente");
+    if (!exito) {
+        // El mensaje de error ya lo muestra caja.cancelarPedido
+        console.log("No se pudo cancelar el pedido. Verifique el ID o el estado.");
+    }
 }
 
 export async function menuClientes(rl) {
@@ -194,7 +212,7 @@ export async function menuClientes(rl) {
         const opcion = await pregunta(rl, "Elige una opción: ");
         switch (opcion) {
             case '1':
-                listarProductosConMap();
+                listarProductos();
                 break;
             case '2':
                 await crearPedidoMultiple(rl);
@@ -206,48 +224,32 @@ export async function menuClientes(rl) {
                 caja.mostrarTotal();
                 break;
             case '5': {
-                let filtrosActivos = true;
-                while (filtrosActivos) {
+                let sub = true;
+                while (sub) {
                     mostrarFiltrosProductos();
-                    const subopcion = await pregunta(rl, "Opción de filtro: ");
-                    switch (subopcion) {
-                        case '1':
-                            listarProductosConMap();
-                            break;
-                        case '2':
-                            cocina.productosBaratos(50);
-                            break;
-                        case '3':
-                            cocina.productosCaros(100);
-                            break;
-                        case '4':
-                            cocina.filtrarPorTipo("bebida");
-                            break;
-                        case '5':
-                            cocina.filtrarPorTipo("postre");
-                            break;
-                        default:
-                            filtrosActivos = false;
-                            break;
+                    const subop = await pregunta(rl, "Opción: ");
+                    switch (subop) {
+                        case '1': listarProductos(); break;
+                        case '2': cocina.productosBaratos(50); break;
+                        case '3': cocina.productosCaros(100); break;
+                        case '4': cocina.filtrarPorTipo("bebida"); break;
+                        case '5': cocina.filtrarPorTipo("postre"); break;
+                        default: sub = false; break;
                     }
-                    if (subopcion >= '1' && subopcion <= '5') {
-                        await pregunta(rl, "\nPresiona Enter para continuar...");
-                    }
+                    if (subop >= '1' && subop <= '5') await pregunta(rl, "\nPresiona Enter...");
                 }
                 break;
             }
             case '6': {
-                let filtrosActivos = true;
-                while (filtrosActivos) {
+                let sub = true;
+                while (sub) {
                     mostrarFiltrosPedidos();
-                    const subopcion = await pregunta(rl, "Opción de filtro: ");
-                    switch (subopcion) {
-                        case '1':
-                            caja.mostrarPedidos();
-                            break;
+                    const subop = await pregunta(rl, "Opción: ");
+                    switch (subop) {
+                        case '1': caja.mostrarPedidos(); break;
                         case '2': {
-                            const nombreB = await pregunta(rl, "Nombre del producto a buscar en pedidos: ");
-                            caja.buscarPedidosPorProducto(nombreB);
+                            const nombre = await pregunta(rl, "Nombre del producto: ");
+                            caja.buscarPedidosPorProducto(nombre);
                             break;
                         }
                         case '3': {
@@ -255,17 +257,16 @@ export async function menuClientes(rl) {
                             caja.filtrarPedidosPorMonto(parseFloat(monto));
                             break;
                         }
-                        default:
-                            filtrosActivos = false;
-                            break;
+                        default: sub = false; break;
                     }
-                    if (subopcion >= '1' && subopcion <= '3') {
-                        await pregunta(rl, "\nPresiona Enter para continuar...");
-                    }
+                    if (subop >= '1' && subop <= '3') await pregunta(rl, "\nPresiona Enter...");
                 }
                 break;
             }
             case '7':
+                await cancelarMiPedido(rl);
+                break;
+            case '8':
                 enMenu = false;
                 break;
             default:

@@ -30,7 +30,8 @@ export function listarProductos() {
     return productos;
 }
 
-// NUEVAS FUNCIONES PARA FILTRAR (usando filter y find)
+// FUNCIONES PARA FILTRAR 
+
 export function productosBaratos(umbral = 50) {
     const baratos = productos.filter(function(p) {
         return p.precio < umbral;
@@ -70,7 +71,7 @@ export function filtrarPorTipo(tipo) {
     return filtrados;
 }
 
-// Función buscar (find) – ejemplo para buscar un producto por nombre
+// Función buscar 
 export function buscarProductoPorNombre(nombre) {
     const producto = productos.find(function(p) {
         return p.nombre.toLowerCase() === nombre.toLowerCase();
