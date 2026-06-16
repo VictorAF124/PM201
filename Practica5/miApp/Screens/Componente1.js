@@ -1,23 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image } from 'react-native';
-import MenuScreen from './Screens/MenuScreen'
+import { StyleSheet, View } from 'react-native';
+
 
 export default function App() {
   return (
-
-    <MenuScreen></MenuScreen>
-
+    <View>
+      <Text>Aqui va la primer Practica en componente nativo</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
-   
     backgroundColor: '#f35858',
-
     flexDirection: 'row',
+    
     justifyContent: 'space-evenly',
     alignItems: 'center',
   },
