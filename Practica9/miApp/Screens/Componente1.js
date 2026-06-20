@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text, Button, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, Button} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Perfil } from '../components/Perfil';
 import { ScrollView } from 'react-native';
